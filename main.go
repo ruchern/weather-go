@@ -5,17 +5,18 @@ import (
 	"net/http"
 	"time"
 	"os"
-	"fmt"
-	"go/scanner"
 )
 
 var Key struct {
-	token string `json:"token"`
+	Token string `json:"token"`
 }
 
 func main() {
 	getApiKey()
-	//getJson("http://api.openweathermap.org/data/2.5/forecast", Key)
+	//url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/forecast?id=524901&APPID=%s", Key.Token)
+	//weather := getJson(url, &Weather{})
+
+	//fmt.Println(weather)
 }
 
 func getApiKey() {
@@ -23,25 +24,21 @@ func getApiKey() {
 	defer token.Close()
 
 	decoder := json.NewDecoder(token)
+	decoder.Decode(&Key)
 
-	if err = decoder.Decode(&Key); err != nil {
-		scanner.PrintError()
-	}
-
-	fmt.Println(Key)
 	return
 }
 
 var client = &http.Client{Timeout: 10 * time.Second}
 
 func getJson(url string, target interface{}) error {
-	r, err := client.Get(url)
+	response, err := client.Get(url)
 
 	if err != nil {
 		return err
 	}
 
-	defer r.Body.Close()
+	defer response.Body.Close()
 
-	return json.NewDecoder(r.Body).Decode(target)
+	return json.NewDecoder(response.Body).Decode(target)
 }
